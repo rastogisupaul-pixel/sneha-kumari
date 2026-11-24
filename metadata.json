@@ -1,0 +1,6 @@
+{
+  "name": "SMILE",
+  "description": "Real-time messaging, voice & video calls, status updates, and communities — बात करें, मुस्कुराएं!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

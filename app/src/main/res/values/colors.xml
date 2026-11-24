@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="smile_yellow">#FFD600</color>
+    <color name="smile_white">#FFFFFF</color>
+    <color name="smile_black">#111111</color>
+    <color name="smile_green">#22C55E</color>
+</resources>

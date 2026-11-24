@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMILE Private Admin Panel</title>
+  <style>
+    :root {
+      --yellow: #FFD600;
+      --yellow-soft: #FFF8D6;
+      --white: #FFFFFF;
+      --bg: #FAFAFA;
+      --ink: #111111;
+      --muted: #5F6368;
+      --border: #E5E7EB;
+      --green: #22C55E;
+      --red: #EF4444;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--ink); }
+    header {
+      background: var(--yellow);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-badge {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--white);
+      display: grid; place-items: center; font-weight: 800; font-size: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .container { max-width: 1120px; margin: 24px auto; padding: 0 16px; }
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .stat-card { background: var(--yellow-soft); border-radius: 14px; padding: 16px; }
+    .stat-val { font-size: 28px; font-weight: 800; margin-top: 6px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+    input, textarea, select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 10px; font-size: 14px; margin-bottom: 12px;
+    }
+    button {
+      background: var(--yellow); color: var(--ink); border: none;
+      padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer;
+    }
+    button.secondary { background: #F3F4F6; }
+    button.danger { background: var(--red); color: var(--white); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    .hidden { display: none; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .status-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; background: var(--yellow-soft);
+    }
+    .status-pill.open { background: #FEE2E2; color: #991B1B; }
+    .status-pill.ok { background: #DCFCE7; color: #166534; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-badge">☺</div>
+      <div>
+        <div style="font-weight:800;font-size:18px;">SMILE Admin Console</div>
+        <div style="font-size:12px;">Private RBAC &amp; 2FA Operations Dashboard — बात करें, मुस्कुराएं!</div>
+      </div>
+    </div>
+    <div id="adminSessionBar" class="row hidden">
+      <span id="adminEmailLabel" style="font-weight:600;font-size:13px;"></span>
+      <button id="signOutBtn" class="secondary">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="loginView" class="card" style="max-width:480px;margin:40px auto;">
+      <h2 style="margin-top:0;">Restricted Admin Sign-In</h2>
+      <p style="font-size:14px;color:var(--muted);">
+        This console is isolated from the SMILE mobile app. Access requires a pre-provisioned admin Firebase account,
+        server-verified RBAC role, and 2FA TOTP code. Public registration is disabled.
+      </p>
+      <label for="backendUrlInput">Backend API Base URL</label>
+      <input id="backendUrlInput" type="url" value="http://localhost:8080" />
+
+      <label for="firebaseApiKeyInput">Firebase Web API Key (from Firebase Console)</label>
+      <input id="firebaseApiKeyInput" type="text" placeholder="Public Firebase Web API Key" />
+
+      <label for="firebaseProjectIdInput">Firebase Project ID</label>
+      <input id="firebaseProjectIdInput" type="text" value="gen-lang-client-0079366378" />
+
+      <label for="totpInput">2FA Authenticator Code (6 digits, if configured)</label>
+      <input id="totpInput" type="text" inputmode="numeric" maxlength="6" placeholder="123456" />
+
+      <div id="authError" style="color:var(--red);font-size:13px;margin-bottom:10px;"></div>
+      <button id="googleAdminSignInBtn" style="width:100%;">Sign In with Authorized Admin Google Account</button>
+    </section>
+
+    <section id="dashboardView" class="hidden">
+      <div class="grid" style="margin-bottom:20px;">
+        <div class="stat-card"><div style="font-size:12px;color:var(--muted);">TOTAL USERS</div><div id="statUsers" class="stat-val">-</div></div>
+        <div class="stat-card"><div style="font-size:12px;color:var(--muted);">ACTIVE CHATS</div><div id="statChats" class="stat-val">-</div></div>
+        <div class="stat-card"><div style="font-size:12px;color:var(--muted);">CALL RECORDS</div><div id="statCalls" class="stat-val">-</div></div>
+        <div class="stat-card"><div style="font-size:12px;color:var(--muted);">OPEN REPORTS</div><div id="statReports" class="stat-val">-</div></div>
+        <div class="stat-card"><div style="font-size:12px;color:var(--muted);">COMMUNITIES</div><div id="statCommunities" class="stat-val">-</div></div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px;">
+          <h3 style="margin:0;">User Management</h3>
+          <div class="row">
+            <input id="userSearchInput" type="text" placeholder="Search name, Smile ID, or UID" style="margin:0;width:240px;" />
+            <button id="searchUsersBtn">Search</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Smile ID</th><th>UID</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px;">
+          <h3 style="margin:0;">Abuse &amp; Technical Reports</h3>
+          <button id="refreshReportsBtn" class="secondary">Refresh</button>
+        </div>
+        <table>
+          <thead><tr><th>Category</th><th>Target</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="reportsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0;">Publish Official SMILE Announcement</h3>
+        <label for="announceTitle">Announcement Title</label>
+        <input id="announceTitle" type="text" maxlength="120" placeholder="System notice or feature update" />
+        <label for="announceBody">Message</label>
+        <textarea id="announceBody" rows="3" maxlength="1000" placeholder="Announcement details..."></textarea>
+        <button id="publishAnnounceBtn">Publish Announcement</button>
+        <span id="announceFeedback" style="margin-left:12px;font-size:13px;"></span>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px;">
+          <h3 style="margin:0;">Admin Audit Logs</h3>
+          <button id="refreshLogsBtn" class="secondary">Refresh Logs</button>
+        </div>
+        <table>
+          <thead><tr><th>Action</th><th>Admin UID</th><th>Target ID</th><th>Details</th></tr></thead>
+          <tbody id="logsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

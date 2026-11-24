@@ -1,0 +1,333 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Private user account, phone number, security PIN hashes, and preferences",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "twoStepPinHash": { "type": "string" },
+        "appLockPinHash": { "type": "string" },
+        "biometricLockEnabled": { "type": "boolean" },
+        "language": { "type": "string", "enum": ["en", "hi"] },
+        "darkMode": { "type": "boolean" },
+        "wallpaperId": { "type": "string" },
+        "dataSaverEnabled": { "type": "boolean" },
+        "autoDownloadWifi": { "type": "boolean" },
+        "autoDownloadCellular": { "type": "boolean" },
+        "notificationsEnabled": { "type": "boolean" },
+        "archivedChatIds": { "type": "array" },
+        "pinnedChatIds": { "type": "array" },
+        "mutedChatIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "phoneNumber", "createdAt", "updatedAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public discoverable Smile user profile with E2EE public key and hashed phone",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "smileId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "about": { "type": "string" },
+        "phoneHash": { "type": "string" },
+        "photoBase64": { "type": "string" },
+        "ecdhPublicKey": { "type": "string" },
+        "online": { "type": "boolean" },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "photoVisibility": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "aboutVisibility": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "lastSeenVisibility": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "NOBODY"] },
+        "readReceiptsEnabled": { "type": "boolean" },
+        "publicDirectory": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "smileId", "displayName", "about", "phoneHash", "ecdhPublicKey", "online", "lastSeen", "photoVisibility", "aboutVisibility", "lastSeenVisibility", "readReceiptsEnabled", "publicDirectory", "createdAt", "updatedAt"]
+    },
+    "ContactEntry": {
+      "title": "ContactEntry",
+      "description": "User's synced or saved Smile contacts",
+      "type": "object",
+      "properties": {
+        "contactUid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "smileId": { "type": "string" },
+        "phoneHash": { "type": "string" },
+        "about": { "type": "string" },
+        "photoBase64": { "type": "string" },
+        "ecdhPublicKey": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["contactUid", "displayName", "smileId", "createdAt", "updatedAt"]
+    },
+    "LookupIndex": {
+      "title": "LookupIndex",
+      "description": "Exact O(1) lookup mapping phoneHash or smileId to userId",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "smileId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "smileId", "displayName", "createdAt", "updatedAt"]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "description": "One-to-one or Group chat thread",
+      "type": "object",
+      "properties": {
+        "chatType": { "type": "string", "enum": ["DIRECT", "GROUP"] },
+        "memberUids": { "type": "array" },
+        "adminUids": { "type": "array" },
+        "coAdminUids": { "type": "array" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "photoBase64": { "type": "string" },
+        "inviteCode": { "type": "string" },
+        "onlyAdminsCanSend": { "type": "boolean" },
+        "disappearingSeconds": { "type": "integer" },
+        "communityId": { "type": "string" },
+        "lastMessageText": { "type": "string" },
+        "lastMessageSenderId": { "type": "string" },
+        "lastMessageTime": { "type": "string", "format": "date-time" },
+        "typingUids": { "type": "array" },
+        "unreadCounts": { "type": "object" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatType", "memberUids", "adminUids", "coAdminUids", "title", "description", "inviteCode", "onlyAdminsCanSend", "disappearingSeconds", "communityId", "lastMessageText", "lastMessageSenderId", "typingUids", "unreadCounts", "createdBy", "createdAt", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "E2EE encrypted chat message with denormalized memberUids",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "memberUids": { "type": "array" },
+        "messageType": { "type": "string", "enum": ["TEXT", "IMAGE", "DOCUMENT", "VOICE", "LOCATION", "CONTACT", "STICKER", "SYSTEM"] },
+        "ciphertext": { "type": "string" },
+        "iv": { "type": "string" },
+        "plainFallback": { "type": "string" },
+        "mediaBase64": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileMimeType": { "type": "string" },
+        "durationSec": { "type": "integer" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "sharedContactName": { "type": "string" },
+        "sharedContactPhone": { "type": "string" },
+        "replyToId": { "type": "string" },
+        "replyToSnippet": { "type": "string" },
+        "forwarded": { "type": "boolean" },
+        "edited": { "type": "boolean" },
+        "deletedForEveryone": { "type": "boolean" },
+        "deletedForUids": { "type": "array" },
+        "reactions": { "type": "object" },
+        "starredByUids": { "type": "array" },
+        "readByUids": { "type": "array" },
+        "deliveredToUids": { "type": "array" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "senderName", "memberUids", "messageType", "ciphertext", "iv", "plainFallback", "forwarded", "edited", "deletedForEveryone", "deletedForUids", "reactions", "starredByUids", "readByUids", "deliveredToUids", "createdAt", "updatedAt"]
+    },
+    "GroupInvite": {
+      "title": "GroupInvite",
+      "description": "Invite code lookup for joining a group chat",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "title", "description", "createdBy", "createdAt"]
+    },
+    "StatusUpdate": {
+      "title": "StatusUpdate",
+      "description": "24-hour expiring image or text status update",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userAvatarBase64": { "type": "string" },
+        "statusType": { "type": "string", "enum": ["TEXT", "IMAGE"] },
+        "textContent": { "type": "string" },
+        "bgColorHex": { "type": "string" },
+        "caption": { "type": "string" },
+        "mediaBase64": { "type": "string" },
+        "privacy": { "type": "string", "enum": ["EVERYONE", "CONTACTS", "EXCEPT"] },
+        "allowedUids": { "type": "array" },
+        "mutedByUids": { "type": "array" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "statusType", "textContent", "bgColorHex", "caption", "privacy", "allowedUids", "mutedByUids", "expiresAt", "createdAt", "updatedAt"]
+    },
+    "StatusView": {
+      "title": "StatusView",
+      "description": "Viewer receipt for a status update",
+      "type": "object",
+      "properties": {
+        "viewerId": { "type": "string" },
+        "viewerName": { "type": "string" },
+        "statusOwnerId": { "type": "string" },
+        "viewedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["viewerId", "viewerName", "statusOwnerId", "viewedAt"]
+    },
+    "CallSession": {
+      "title": "CallSession",
+      "description": "WebRTC call signaling and history entry",
+      "type": "object",
+      "properties": {
+        "callerId": { "type": "string" },
+        "callerName": { "type": "string" },
+        "calleeIds": { "type": "array" },
+        "participantUids": { "type": "array" },
+        "chatId": { "type": "string" },
+        "callType": { "type": "string", "enum": ["VOICE", "VIDEO", "GROUP_VOICE", "GROUP_VIDEO"] },
+        "status": { "type": "string", "enum": ["RINGING", "ACCEPTED", "REJECTED", "ENDED", "MISSED"] },
+        "sdpOffer": { "type": "string" },
+        "sdpAnswer": { "type": "string" },
+        "durationSeconds": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["callerId", "callerName", "calleeIds", "participantUids", "chatId", "callType", "status", "durationSeconds", "createdAt", "updatedAt"]
+    },
+    "Community": {
+      "title": "Community",
+      "description": "Community hub linking multiple groups and announcements",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "iconBase64": { "type": "string" },
+        "adminUids": { "type": "array" },
+        "memberUids": { "type": "array" },
+        "linkedChatIds": { "type": "array" },
+        "announcementChatId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "description", "adminUids", "memberUids", "linkedChatIds", "announcementChatId", "createdBy", "createdAt", "updatedAt"]
+    },
+    "BlockedUser": {
+      "title": "BlockedUser",
+      "description": "Blocked user record owned by blocker",
+      "type": "object",
+      "properties": {
+        "blockedUid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["blockedUid", "displayName", "createdAt"]
+    },
+    "UserNotification": {
+      "title": "UserNotification",
+      "description": "In-app notification entry owned by recipient",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "notifType": { "type": "string" },
+        "refId": { "type": "string" },
+        "readFlag": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "body", "notifType", "refId", "readFlag", "createdAt"]
+    },
+    "ReportEntry": {
+      "title": "ReportEntry",
+      "description": "Abuse or technical issue report submitted by a user",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "targetUserId": { "type": "string" },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "reportType": { "type": "string", "enum": ["USER_ABUSE", "TECH_ISSUE"] },
+        "status": { "type": "string", "enum": ["OPEN", "REVIEWED", "RESOLVED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "targetUserId", "reason", "details", "reportType", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "Private user settings, phone number, and hashed lock PINs"
+    },
+    "/users/{userId}/contacts/{contactUid}": {
+      "schema": { "$ref": "#/entities/ContactEntry" },
+      "description": "Saved or synced Smile contacts for the user"
+    },
+    "/users/{userId}/blockedUsers/{blockedUid}": {
+      "schema": { "$ref": "#/entities/BlockedUser" },
+      "description": "Blocked user list for the user"
+    },
+    "/users/{userId}/notifications/{notifId}": {
+      "schema": { "$ref": "#/entities/UserNotification" },
+      "description": "Notification log for the user"
+    },
+    "/userProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Publicly discoverable Smile profile and E2EE public key"
+    },
+    "/phoneLookup/{phoneHash}": {
+      "schema": { "$ref": "#/entities/LookupIndex" },
+      "description": "Exact hashed phone lookup mapping to userId"
+    },
+    "/smileIdLookup/{smileId}": {
+      "schema": { "$ref": "#/entities/LookupIndex" },
+      "description": "Exact Smile ID lookup mapping to userId"
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatRoom" },
+      "description": "Direct and group chats"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Messages inside a chat with denormalized memberUids"
+    },
+    "/groupInvites/{inviteCode}": {
+      "schema": { "$ref": "#/entities/GroupInvite" },
+      "description": "Invite codes for group chats"
+    },
+    "/statuses/{statusId}": {
+      "schema": { "$ref": "#/entities/StatusUpdate" },
+      "description": "24-hour status updates"
+    },
+    "/statuses/{statusId}/views/{viewerId}": {
+      "schema": { "$ref": "#/entities/StatusView" },
+      "description": "Status view receipts"
+    },
+    "/calls/{callId}": {
+      "schema": { "$ref": "#/entities/CallSession" },
+      "description": "WebRTC call signaling and history"
+    },
+    "/communities/{communityId}": {
+      "schema": { "$ref": "#/entities/Community" },
+      "description": "Communities linking multiple groups"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/ReportEntry" },
+      "description": "Abuse and technical issue reports"
+    }
+  }
+}
